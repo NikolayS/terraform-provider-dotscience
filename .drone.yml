@@ -6,6 +6,7 @@ workspace:
   base: /go
   path: src/github.com/dotmesh-io/terraform-provider-dotscience
 
+steps:
 - name: test
   image: golang:1.13
   environment:
