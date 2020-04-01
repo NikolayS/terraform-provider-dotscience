@@ -1,0 +1,5 @@
+example/terraform-provider-dotscience
+example/.terraform
+example/terraform.tfstate
+example/terraform.tfstate.backup
+*.log
