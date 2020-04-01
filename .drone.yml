@@ -11,10 +11,9 @@ steps:
   image: golang:1.13
   environment:
     GO111MODULE: on
-    TERRAFORM_VERSION: 0.12.21
   commands:
     - apt-get update && apt-get install -y --no-install-recommends git curl unzip
-    - curl -L -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
+    - curl -L -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.12.21/terraform_0.12.21_linux_amd64.zip
     - cd /tmp && unzip terraform.zip
     - mv /tmp/terraform /usr/local/bin
     - rm -f /tmp/terraform.zip
