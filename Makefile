@@ -14,14 +14,10 @@ install-release:
 install:
 	cd cmd/terraform-provider-dotscience && go install
 
-image:
-	docker build -t quay.io/dotmesh/terraform-provider-dotscience:alpha -f Dockerfile .
-	#docker push quay.io/dotmesh/dotscience-tf-runner-provider:alpha
-
 test-install: install
 	cp $(GOPATH)/bin/terraform-provider-dotscience example
 
-test:
+test: test-install
 	go run cmd/test/main.go
 
 test-clean:
