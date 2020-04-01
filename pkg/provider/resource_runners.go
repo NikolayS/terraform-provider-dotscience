@@ -1,6 +1,9 @@
 package provider
 
 import (
+	"fmt"
+
+	"github.com/dotmesh-io/terraform-provider-dotscience/pkg/api"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -9,7 +12,7 @@ import (
 // we don't actually do anything here - just tell terraform we
 // are in "created" state and everything is ok
 func resourceRunnersCreate(d *schema.ResourceData, m interface{}) error {
-	//d.SetId("dotscience-runners")
+	d.SetId("dotscience-runners")
 	return resourceRunnersRead(d, m)
 }
 
@@ -22,11 +25,11 @@ func resourceRunnersRead(d *schema.ResourceData, m interface{}) error {
 // this is the key handler - it's job is to delete any runners
 // via the gateway api and only return when they are deleted
 func resourceRunnersDelete(d *schema.ResourceData, m interface{}) error {
-	// client := (m).Client
-	// // ping the API for version to check our credentials
-	// if _, err := client.Version(); err != nil {
-	// 	return fmt.Errorf("Error connecting to the dotscience API: %s", err)
-	// }
+	client := m.(*api.Client)
+	// ping the API for version to check our credentials
+	if _, err := client.Version(); err != nil {
+		return fmt.Errorf("Error connecting to the dotscience API: %s", err)
+	}
 	// // load a list of the runners
 	// runners, err := client.ListRunners()
 	// if err != nil {

@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"github.com/dotmesh-io/terraform-provider-dotscience/pkg/api"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/terraform"
 )
@@ -33,7 +34,7 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		client := &Client{
+		client := &api.Client{
 			URL:      d.Get("hub_public_url").(string),
 			Username: d.Get("hub_admin_username").(string),
 			Password: d.Get("hub_admin_password").(string),
