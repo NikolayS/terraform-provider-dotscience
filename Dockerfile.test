@@ -1,0 +1,25 @@
+FROM golang:alpine AS build-env
+ARG TERRAFORM_VERSION=0.12.21
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh curl make
+
+RUN curl -L -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip && \
+  cd /tmp && \
+  unzip terraform.zip && \
+  mv terraform /usr/local/bin && \
+  rm -f terraform.zip
+
+WORKDIR /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience
+COPY ./cmd/terraform-provider-dotscience /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience/cmd/terraform-provider-dotscience
+COPY ./Makefile /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience/Makefile
+COPY ./pkg /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience/pkg
+COPY ./go.mod /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience/go.mod
+COPY ./go.sum /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience/go.sum
+
+ENV GO111MODULE=on
+ENV TF_LOG=debug
+RUN make test-install
+COPY ./cmd/test /usr/local/go/src/github.com/dotmesh-io/terraform-provider-dotscience/cmd/test
+
+ENTRYPOINT ["make", "test"]

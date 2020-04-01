@@ -24,7 +24,8 @@ func (client *Client) Request(method, endpoint string, data io.Reader) ([]byte, 
 	if logging.IsDebugOrHigher() {
 		log.Printf("[DEBUG] running api request: %s:%s %s %s%s", client.Username, "<password>", method, client.URL, endpoint)
 	}
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s", client.URL, endpoint), data)
+	url := fmt.Sprintf("%s%s", client.URL, endpoint)
+	req, err := http.NewRequest(method, url, data)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +43,7 @@ func (client *Client) Request(method, endpoint string, data io.Reader) ([]byte, 
 		}
 		return response, nil
 	} else {
-		return response, fmt.Errorf("Got non-200 status code %d, original error: %s", resp.StatusCode, err)
+		return response, fmt.Errorf("Got non-200 status code %d, for %s %s - original error: %s", resp.StatusCode, method, url, err)
 	}
 }
 
@@ -55,7 +56,7 @@ func (client *Client) Version() (string, error) {
 }
 
 func (client *Client) ListRunners() (*[]types.Runner, error) {
-	data, err := client.Request("GET", "/v2/runners", nil)
+	data, err := client.Request("GET", "/admin/v1/runners", nil)
 	if err != nil {
 		return nil, err
 	}

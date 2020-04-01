@@ -14,13 +14,18 @@ install-release:
 install:
 	cd cmd/terraform-provider-dotscience && go install
 
-install-example: install
-	cp $(GOPATH)/bin/terraform-provider-dotscience example
-
 image:
 	docker build -t quay.io/dotmesh/terraform-provider-dotscience:alpha -f Dockerfile .
 	#docker push quay.io/dotmesh/dotscience-tf-runner-provider:alpha
 
+test-install: install
+	cp $(GOPATH)/bin/terraform-provider-dotscience example
+
 test:
-	go get github.com/mfridman/tparse
-	go test -json -v `go list ./... | egrep -v /tests` -cover | tparse -all -smallscreen
+	go run cmd/test/main.go
+
+test-clean:
+	rm -f example/terraform-provider-dotscience
+	rm -rf example/.terraform
+	rm -f example/terraform.tfstate
+	rm -f example/terraform.tfstate.backup

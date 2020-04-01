@@ -2,8 +2,10 @@ package provider
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/dotmesh-io/terraform-provider-dotscience/pkg/api"
+	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
@@ -30,15 +32,15 @@ func resourceRunnersDelete(d *schema.ResourceData, m interface{}) error {
 	if _, err := client.Version(); err != nil {
 		return fmt.Errorf("Error connecting to the dotscience API: %s", err)
 	}
-	// // load a list of the runners
-	// runners, err := client.ListRunners()
-	// if err != nil {
-	// 	return fmt.Errorf("Error loading runners: %s", err)
-	// }
+	// load a list of the runners
+	runners, err := client.ListRunners()
+	if err != nil {
+		return fmt.Errorf("Error loading runners: %s", err)
+	}
 
-	// if logging.IsDebugOrHigher() {
-	// 	log.Printf("[DEBUG] found runner list count: %d", len(runners))
-	// }
+	if logging.IsDebugOrHigher() {
+		log.Printf("[DEBUG] found runner list count: %d", len(*runners))
+	}
 
 	return nil
 }
