@@ -33,22 +33,12 @@ func Provider() terraform.ResourceProvider {
 		},
 	}
 	provider.ConfigureFunc = func(d *schema.ResourceData) (interface{}, error) {
-		terraformVersion := provider.TerraformVersion
-		if terraformVersion == "" {
-			// Terraform 0.12 introduced this field to the protocol
-			// We can therefore assume that if it's missing it's 0.10 or 0.11
-			terraformVersion = "0.11+compatible"
+		client := &Client{
+			URL:      d.Get("hub_public_url").(string),
+			Username: d.Get("hub_admin_username").(string),
+			Password: d.Get("hub_admin_password").(string),
 		}
-		return providerConfigure(d, terraformVersion)
+		return client, nil
 	}
 	return provider
-}
-
-func providerConfigure(d *schema.ResourceData, terraformVersion string) (interface{}, error) {
-	client := &Client{
-		URL:      d.Get("hub_public_url").(string),
-		Username: d.Get("hub_admin_username").(string),
-		Password: d.Get("hub_admin_password").(string),
-	}
-	return client, nil
 }
