@@ -3,11 +3,62 @@ package provider
 import (
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/dotmesh-io/terraform-provider-dotscience/pkg/api"
-	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
+
+func deleteAllTasks(client *api.Client) error {
+	runners, err := client.ListRunners()
+	if err != nil {
+		return fmt.Errorf("Error loading runners: %s", err)
+	}
+	log.Printf("found %d runners, terminating tasks", len(runners))
+	for _, runner := range runners {
+		log.Printf("terminating tasks on runner: %s", runner.ID)
+		err = client.StopRunnerTasks(runner)
+		if err != nil {
+			return err
+		}
+	}
+	return waitOnFunction("waitOnTaskTermination", time.Minute*5, time.Second*5, func() bool {
+		runners, err := client.ListRunners()
+		if err != nil {
+			return false
+		}
+		for _, runner := range runners {
+			for _, task := range runner.Tasks {
+				if task.Status != "terminated" {
+					return false
+				}
+			}
+		}
+		return true
+	})
+}
+
+func deleteAllRunners(client *api.Client) error {
+	runners, err := client.ListRunners()
+	if err != nil {
+		return fmt.Errorf("Error loading runners: %s", err)
+	}
+	log.Printf("found %d runners, deleting", len(runners))
+	for _, runner := range runners {
+		log.Printf("deleting runner: %s", runner.ID)
+		err = client.DeleteRunner(runner)
+		if err != nil {
+			return err
+		}
+	}
+	return waitOnFunction("waitOnRunnersDeleted", time.Minute*5, time.Second*5, func() bool {
+		runners, err := client.ListRunners()
+		if err != nil {
+			return false
+		}
+		return len(runners) == 0
+	})
+}
 
 // we set the id here so terraform knows the resource has been
 // "created" and will not attempt to destroy it because of an empty id
@@ -32,14 +83,17 @@ func resourceRunnersDelete(d *schema.ResourceData, m interface{}) error {
 	if _, err := client.Version(); err != nil {
 		return fmt.Errorf("Error connecting to the dotscience API: %s", err)
 	}
-	// load a list of the runners
-	runners, err := client.ListRunners()
+
+	err := deleteAllTasks(client)
+
 	if err != nil {
-		return fmt.Errorf("Error loading runners: %s", err)
+		return err
 	}
 
-	if logging.IsDebugOrHigher() {
-		log.Printf("[DEBUG] found runner list count: %d", len(*runners))
+	err = deleteAllRunners(client)
+
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -51,12 +105,6 @@ func resourceRunners() *schema.Resource {
 		Read:   resourceRunnersRead,
 		Delete: resourceRunnersDelete,
 
-		Schema: map[string]*schema.Schema{
-			// "address": &schema.Schema{
-			// 	Type:     schema.TypeString,
-			// 	Required: true,
-			// 	ForceNew: true,
-			// },
-		},
+		Schema: map[string]*schema.Schema{},
 	}
 }

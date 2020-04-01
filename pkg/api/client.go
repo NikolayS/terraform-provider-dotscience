@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/dotmesh-io/terraform-provider-dotscience/pkg/types"
 	"github.com/hashicorp/terraform-plugin-sdk/helper/logging"
@@ -55,7 +56,7 @@ func (client *Client) Version() (string, error) {
 	return string(data), nil
 }
 
-func (client *Client) ListRunners() (*[]types.Runner, error) {
+func (client *Client) ListRunners() ([]types.Runner, error) {
 	data, err := client.Request("GET", "/admin/v1/runners", nil)
 	if err != nil {
 		return nil, err
@@ -64,5 +65,15 @@ func (client *Client) ListRunners() (*[]types.Runner, error) {
 	if err = json.Unmarshal(data, runners); err != nil {
 		return nil, fmt.Errorf("failed decoding ListRunners response, err: %#v\n%#v\n", err, data)
 	}
-	return runners, nil
+	return *runners, nil
+}
+
+func (client *Client) StopRunnerTasks(runner types.Runner) error {
+	_, err := client.Request("POST", fmt.Sprintf("/admin/v1/runners/%s/%s/action", runner.AccountID, runner.ID), strings.NewReader(`{"action":"stop_all_tasks"}`))
+	return err
+}
+
+func (client *Client) DeleteRunner(runner types.Runner) error {
+	_, err := client.Request("DELETE", fmt.Sprintf("/admin/v1/runners/%s/%s", runner.AccountID, runner.ID), nil)
+	return err
 }

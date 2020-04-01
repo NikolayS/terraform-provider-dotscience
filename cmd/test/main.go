@@ -70,7 +70,7 @@ func main() {
 
 	requestLogger := func(handler func(resp http.ResponseWriter, req *http.Request)) func(resp http.ResponseWriter, req *http.Request) {
 		return func(resp http.ResponseWriter, req *http.Request) {
-			fmt.Printf("GOT request: %s %s", req.Method, req.URL)
+			fmt.Printf("GOT request: %s %s\n", req.Method, req.URL)
 			handler(resp, req)
 		}
 	}
@@ -90,7 +90,7 @@ func main() {
 		response("ok", 200, nil, resp, req)
 		// set the task to terminated after 10 seconds
 		go func() {
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Second * 12)
 			task.Status = "terminated"
 		}()
 	}
@@ -108,7 +108,7 @@ func main() {
 		// remove the runner after 10 seconds to simulate pb removing the runner
 		// in the background
 		go func() {
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Second * 12)
 			deletedRunners = append(deletedRunners, runner)
 			runners = []*types.Runner{}
 		}()
@@ -118,7 +118,7 @@ func main() {
 	r.HandleFunc("/v2/version", requestLogger(versionHandler)).Methods("GET")
 	r.HandleFunc("/admin/v1/runners", requestLogger(listHandler)).Methods("GET")
 	r.HandleFunc("/admin/v1/runners/{account}/{id}", requestLogger(deleteHandler)).Methods("DELETE")
-	r.HandleFunc("/admin/v1/runners/{account}/{id}/action", requestLogger(actionHandler)).Methods("GET")
+	r.HandleFunc("/admin/v1/runners/{account}/{id}/action", requestLogger(actionHandler)).Methods("POST")
 
 	ts := httptest.NewServer(r)
 	defer ts.Close()
@@ -150,7 +150,7 @@ func main() {
 	}
 
 	fmt.Printf("----------------------------------------------------------\n")
-	fmt.Printf("test complete")
+	fmt.Printf("test complete\n")
 	fmt.Printf("----------------------------------------------------------\n")
 	os.Exit(0)
 }
