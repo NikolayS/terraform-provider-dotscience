@@ -9,6 +9,22 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/helper/schema"
 )
 
+func hasTerminatedAllTasks(client *api.Client) (bool, error) {
+	runners, err := client.ListRunners()
+	if err != nil {
+		return false, err
+	}
+	for _, runner := range runners {
+		for _, task := range runner.Tasks {
+			if task.Status != "terminated" {
+				log.Printf("task status is still %s", task.Status)
+				return false, nil
+			}
+		}
+	}
+	return true, err
+}
+
 func deleteAllTasks(client *api.Client) error {
 	runners, err := client.ListRunners()
 	if err != nil {
@@ -23,22 +39,22 @@ func deleteAllTasks(client *api.Client) error {
 		}
 	}
 	return waitOnFunction("waitOnTaskTermination", time.Minute*5, time.Second*5, func() bool {
-		runners, err := client.ListRunners()
-		if err != nil {
-			return false
-		}
-		for _, runner := range runners {
-			for _, task := range runner.Tasks {
-				if task.Status != "terminated" {
-					return false
-				}
-			}
-		}
-		return true
+		allTasksTerminated, _ := hasTerminatedAllTasks(client)
+		return allTasksTerminated
 	})
 }
 
 func deleteAllRunners(client *api.Client) error {
+	allTasksTerminated, err := hasTerminatedAllTasks(client)
+
+	if err != nil {
+		return fmt.Errorf("Error loading runners: %s", err)
+	}
+
+	if !allTasksTerminated {
+		return fmt.Errorf("There are still tasks active on the runners - cannot delete runners")
+	}
+
 	runners, err := client.ListRunners()
 	if err != nil {
 		return fmt.Errorf("Error loading runners: %s", err)
