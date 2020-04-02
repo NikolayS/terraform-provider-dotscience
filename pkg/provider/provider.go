@@ -12,19 +12,19 @@ func Provider() terraform.ResourceProvider {
 			"hub_public_url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("DOTSCIENCE_PUBLIC_URL", nil),
+				DefaultFunc: schema.EnvDefaultFunc("DOTSCIENCE_URL", nil),
 				Description: "The public url of your dotscience hub.",
 			},
 			"hub_admin_username": {
 				Type:        schema.TypeString,
 				Optional:    true,
-				DefaultFunc: schema.EnvDefaultFunc("DOTSCIENCE_ADMIN_USERNAME", "admin"),
+				DefaultFunc: schema.EnvDefaultFunc("DOTSCIENCE_USERNAME", "admin"),
 				Description: "The username for the admin user.",
 			},
 			"hub_admin_password": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("DOTSCIENCE_ADMIN_PASSWORD", nil),
+				DefaultFunc: schema.EnvDefaultFunc("DOTSCIENCE_PASSWORD", nil),
 				Description: "The password for the admin user.",
 			},
 		},
