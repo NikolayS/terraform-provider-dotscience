@@ -123,9 +123,9 @@ func main() {
 	ts := httptest.NewServer(r)
 	defer ts.Close()
 
-	os.Setenv("DOTSCIENCE_URL", ts.URL)
-	os.Setenv("DOTSCIENCE_USERNAME", "admin")
-	os.Setenv("DOTSCIENCE_PASSWORD", "password")
+	os.Setenv("TF_VAR_hub_public_url", ts.URL)
+	os.Setenv("TF_VAR_hub_admin_username", "admin")
+	os.Setenv("TF_VAR_hub_admin_password", "password")
 
 	fmt.Printf("api server url: %s\n", ts.URL)
 
