@@ -11,19 +11,19 @@ steps:
   image: docker:git
   commands:
     - git fetch --tags
-- name: test
-  image: golang:1.13
-  volumes:
-    - name: deps
-      path: /go
-  environment:
-    GO111MODULE: on
-  commands:
-    - apt-get update && apt-get install -y --no-install-recommends git curl unzip
-    - curl -L -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.12.21/terraform_0.12.21_linux_amd64.zip
-    - unzip /tmp/terraform.zip -d /usr/local/bin
-    - rm -f /tmp/terraform.zip
-    - make test
+# - name: test
+#   image: golang:1.13
+#   volumes:
+#     - name: deps
+#       path: /go
+#   environment:
+#     GO111MODULE: on
+#   commands:
+#     - apt-get update && apt-get install -y --no-install-recommends git curl unzip
+#     - curl -L -o /tmp/terraform.zip https://releases.hashicorp.com/terraform/0.12.21/terraform_0.12.21_linux_amd64.zip
+#     - unzip /tmp/terraform.zip -d /usr/local/bin
+#     - rm -f /tmp/terraform.zip
+#     - make test
 - name: release
   image: golang:1.13
   environment:
