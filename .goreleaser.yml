@@ -4,6 +4,18 @@ env:
 before:
   hooks:
     - go mod download
+builds:  
+  - main: ./cmd/terraform-provider-dotscience/main.go
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - 386
+      - amd64
+    ignore:
+      - goos: darwin
+        goarch: 386
 archives:
   - files:
     - none*
