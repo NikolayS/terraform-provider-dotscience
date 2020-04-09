@@ -31,7 +31,10 @@ func response(obj interface{}, statusCode int, err error, resp http.ResponseWrit
 	if err != nil {
 		code := 500
 		resp.WriteHeader(code)
-		resp.Write([]byte(err.Error()))
+		_, writeErr := resp.Write([]byte(err.Error()))
+		if writeErr != nil {
+			fmt.Printf("Error writing error %s\n", writeErr.Error())
+		}
 		return
 	}
 	if obj != nil {
@@ -39,32 +42,38 @@ func response(obj interface{}, statusCode int, err error, resp http.ResponseWrit
 		resp.WriteHeader(statusCode)
 		pr, pw := io.Pipe()
 		go func() {
-			pw.CloseWithError(json.NewEncoder(pw).Encode(obj))
+			writeErr := pw.CloseWithError(json.NewEncoder(pw).Encode(obj))
+			if writeErr != nil {
+				fmt.Printf("Error json encoding %s\n", writeErr.Error())
+			}
 		}()
-
-		io.Copy(resp, pr)
+		_, copyErr := io.Copy(resp, pr)
+		if copyErr != nil {
+			fmt.Printf("Error copying bytes%s\n", copyErr.Error())
+		}
 	} else {
 		resp.WriteHeader(statusCode)
 	}
 }
 
 func main() {
-	runners := []*types.Runner{
-		&types.Runner{
-			ID:          "testrunner",
-			AccountID:   "testaccount",
-			Name:        "Test Runner",
-			Status:      "online",
-			ServerState: "online",
-			Tasks: []*types.Task{
-				&types.Task{
-					ID:            "1",
-					DesiredStatus: "running",
-					Status:        "running",
-				},
-			},
-		},
+
+	task := &types.Task{
+		ID:            "1",
+		DesiredStatus: "running",
+		Status:        "running",
 	}
+
+	runner := &types.Runner{
+		ID:          "testrunner",
+		AccountID:   "testaccount",
+		Name:        "Test Runner",
+		Status:      "online",
+		ServerState: "online",
+		Tasks:       []*types.Task{task},
+	}
+
+	runners := []*types.Runner{runner}
 
 	deletedRunners := []*types.Runner{}
 
@@ -129,7 +138,12 @@ func main() {
 
 	fmt.Printf("api server url: %s\n", ts.URL)
 
-	os.Chdir("example")
+	chdirErr := os.Chdir("example")
+
+	if chdirErr != nil {
+		fmt.Printf("Error changing directory %s\n", chdirErr.Error())
+		os.Exit(1)
+	}
 
 	Terraform([]string{"init"})
 	Terraform([]string{"apply", "-auto-approve"})
