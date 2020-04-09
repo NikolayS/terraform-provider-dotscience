@@ -24,8 +24,9 @@ steps:
     GITHUB_TOKEN:
       from_secret: GITHUB_TOKEN
   commands:
-    - git fetch $DRONE_TAG
-    - git checkout $DRONE_TAG
+    # - export GORELEASER_CURRENT_TAG=$DRONE_TAG
+    # - git fetch $DRONE_TAG
+    # - git checkout $DRONE_TAG
     - curl -sL https://git.io/goreleaser | bash
   when:
     event: tag
