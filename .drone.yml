@@ -34,6 +34,8 @@ steps:
   #   - name: deps
   #     path: /go
   commands:
+    - git fetch $DRONE_TAG
+    - git checkout $DRONE_TAG
     - curl -sL https://git.io/goreleaser | bash
   when:
     event: tag
